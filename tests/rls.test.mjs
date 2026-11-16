@@ -80,9 +80,9 @@ try {
   r = await a.from('lesson_unlocks').insert({ user_id: A.id, lesson_id: 2 }).select();
   check('A не может открыть себе урок', refused(r), why(r));
   r = await a.rpc('admin_progress');
-  check('A не может вызвать сводку владельца', Boolean(r.error), why(r));
+  check('A не может вызвать сводку владельца', r.error?.message === 'Только для владельца', why(r));
   r = await a.rpc('submit_quiz', { p_lesson_id: 3, p_answers: [1, 1, 1, 1, 1, 1, 1, 1] });
-  check('A не может сдать тест закрытого урока', Boolean(r.error), why(r));
+  check('A не может сдать тест закрытого урока', r.error?.message === 'Урок ещё закрыт', why(r));
   r = await a.from('profiles').select('id, role').eq('id', A.id);
   check('A видит свой профиль с ролью student', r.data?.[0]?.role === 'student', why(r));
   r = await a.rpc('my_progress');
