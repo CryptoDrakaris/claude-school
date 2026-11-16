@@ -328,7 +328,17 @@ function ReviewCard({ item, studentName, onDone }: { item: QueueItem; studentNam
         </p>
         <div className="field">
           <label htmlFor={`${idBase}-comment`}>Комментарий участнику</label>
-          <textarea id={`${idBase}-comment`} rows={3} value={comment} onChange={(e) => setComment(e.target.value)} />
+          <textarea
+            id={`${idBase}-comment`}
+            rows={3}
+            maxLength={4000}
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            aria-describedby={`${idBase}-comment-hint`}
+          />
+          <p id={`${idBase}-comment-hint`} className="muted">
+            До 4000 знаков.
+          </p>
         </div>
         {error && (
           <p className="field-error" role="alert">
