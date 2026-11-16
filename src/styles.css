@@ -1,0 +1,65 @@
+/* Базовые токены. Палитра и шрифты дорабатываются на этапе 4, проверка – на этапе 7. */
+:root {
+  --bg: #fbfaf7;
+  --text: #1f1f1c;
+  --muted: #5c5b55;
+  --accent: #2f5d50;
+  --border: #dedbd2;
+  --notice-bg: #f3efe2;
+  --focus: #1d4ed8;
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161614;
+    --text: #ecebe6;
+    --muted: #a9a79f;
+    --accent: #8cc3b1;
+    --border: #34332f;
+    --notice-bg: #2a2820;
+    --focus: #93b4ff;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+a { color: var(--accent); }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.site-header {
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px;
+}
+
+.site-title {
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+.notice {
+  background: var(--notice-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+}

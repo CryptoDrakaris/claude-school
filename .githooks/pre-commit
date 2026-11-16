@@ -1,0 +1,4 @@
+#!/bin/sh
+# Перед каждым коммитом: нет ли секретов в изменениях и чиста ли типографика.
+npm run --silent check:secrets || exit 1
+npm run --silent check:typo || exit 1

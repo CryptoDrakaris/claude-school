@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+# секреты: ключ service role и прочие локальные переменные
+.env
+.env.*
+!.env.example
+
+# ключи ответов на тесты: в публичный репозиторий не попадают
+supabase/seed/quiz_keys.sql
+supabase/.temp/
