@@ -44,7 +44,14 @@ npm run dev            # http://localhost:5173/claude-school/
 
 Supabase → Authentication → Users → Add user → Send invitation → почта участника. Профиль с ролью «участник» создаётся сам; имя человек вводит при первом входе.
 
-Встроенная почта Supabase отправляет письма только адресам участников организации Supabase и не больше нескольких в час. Для приглашения друзей нужен свой SMTP (Authentication → Emails → SMTP Settings), например Resend или почтовый ящик с паролем приложения.
+Встроенная почта Supabase отправляет письма только адресам участников организации Supabase и не больше нескольких в час. Для приглашения друзей нужен свой SMTP – проще всего отдельный ящик Gmail:
+
+1. Завести ящик Gmail для рассылки курса, включить в нём двухэтапную проверку, создать **пароль приложения** (Google Account → Security → App passwords).
+2. Supabase → Authentication → Emails → SMTP Settings → Enable custom SMTP:
+   - Sender email – адрес ящика, Sender name – «Учимся работать с Claude»;
+   - Host `smtp.gmail.com`, Port `465`, Username – адрес ящика, Password – пароль приложения.
+3. Authentication → Emails → Templates: в **Invite user** и **Magic Link** вставить тексты из `supabase/templates/invite.html` и `magic_link.html`, тему письма – из комментария в начале файла. Иначе письма придут на английском.
+4. Пригласить себя ещё раз или запросить ссылку на сайте – убедиться, что письмо пришло по-русски и не в «Спам».
 
 ### Как назначить владельца
 

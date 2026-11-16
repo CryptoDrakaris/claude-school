@@ -1,0 +1,10 @@
+<!-- Supabase → Authentication → Emails → Templates → Magic Link.
+     Тема письма: Ссылка для входа на курс -->
+<div style="font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #1f2128; max-width: 520px;">
+  <p>Здравствуйте!</p>
+  <p>Вот ссылка для входа на курс «Учимся работать с Claude».</p>
+  <p>
+    <a href="{{ .ConfirmationURL }}" style="display: inline-block; padding: 12px 20px; background: #2b3f9e; color: #ffffff; text-decoration: none;">Войти</a>
+  </p>
+  <p style="color: #5b5d65; font-size: 14px;">Ссылка одноразовая и действует один час. Если вы не запрашивали вход, просто удалите это письмо.</p>
+</div>
