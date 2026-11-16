@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../lib/auth';
 
@@ -25,6 +25,11 @@ function checkLink(value: string): string | null {
 
 export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number; canSubmit: boolean; onChanged: () => void }) {
   const { session } = useAuth();
+  // Зависим от id пользователя, а не от объекта сессии: supabase-js присылает новый объект
+  // при каждом возврате во вкладку и обновлении токена (аудит N1).
+  const userId = session?.user.id;
+  // Пока участник правит форму, данные из базы её не перезаписывают.
+  const edited = useRef(false);
   const [row, setRow] = useState<HomeworkRow | null | undefined>(undefined);
   const [link, setLink] = useState('');
   const [comment, setComment] = useState('');
@@ -34,23 +39,23 @@ export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number;
   const [justSent, setJustSent] = useState(false);
 
   const load = useCallback(async () => {
-    if (!supabase || !session) return;
+    if (!supabase || !userId) return;
     const { data, error: err } = await supabase
       .from('homework')
       .select('id, link, comment, status, score, admin_comment, submitted_at, reviewed_at')
       .eq('lesson_id', lessonId)
-      .eq('user_id', session.user.id)
+      .eq('user_id', userId)
       .maybeSingle();
     if (err) {
       setError('Не удалось загрузить задание. Обновите страницу.');
       return;
     }
     setRow(data as HomeworkRow | null);
-    if (data) {
+    if (data && !edited.current) {
       setLink(data.link);
       setComment(data.comment ?? '');
     }
-  }, [lessonId, session]);
+  }, [lessonId, userId]);
 
   useEffect(() => {
     load();
@@ -75,6 +80,7 @@ export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number;
       return;
     }
     setJustSent(true);
+    edited.current = false;
     await load();
     onChanged();
   }
@@ -153,6 +159,7 @@ export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number;
               placeholder="https://claude.ai/share/…"
               value={link}
               onChange={(e) => {
+                edited.current = true;
                 setLink(e.target.value);
                 setLinkError(null);
               }}
@@ -172,7 +179,10 @@ export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number;
               rows={5}
               maxLength={4000}
               value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              onChange={(e) => {
+                edited.current = true;
+                setComment(e.target.value);
+              }}
               aria-describedby="hw-comment-hint"
             />
             <p id="hw-comment-hint" className="muted">
