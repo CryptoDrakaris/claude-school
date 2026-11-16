@@ -6,7 +6,18 @@ export function Header({ route, profile }: { route: Route; profile: Profile | nu
   const current = (name: Route['name']) => (route.name === name ? 'page' : undefined);
   return (
     <header className="site-header">
-      <a className="skip-link" href="#main">
+      {/* При хэш-маршрутах #main сменил бы страницу: фокус переводим сами (аудит N6). */}
+      <a
+        className="skip-link"
+        href="#main"
+        onClick={(e) => {
+          e.preventDefault();
+          const main = document.getElementById('main');
+          if (!main) return;
+          if (!main.hasAttribute('tabindex')) main.setAttribute('tabindex', '-1');
+          main.focus();
+        }}
+      >
         К содержанию
       </a>
       <a href="#/" className="site-title">
