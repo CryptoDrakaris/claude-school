@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Превью системы · Зачётка</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Marck+Script&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens/tokens.css">
+<script>if (location.hash === '#dark') document.documentElement.dataset.theme = 'dark'; else document.documentElement.dataset.theme = 'light';</script>
+<style>
+  :root { --text-read: 1.0625rem; --font: 'Golos Text', system-ui, sans-serif; --font-hand: 'Marck Script', cursive; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 400 var(--text-body)/var(--leading-body) var(--font); }
+  .wrap { max-width: 760px; margin: 0 auto; padding: var(--space-6) var(--space-margin) var(--space-8); }
+  .top { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--border-subtle); padding: var(--space-3) var(--space-margin); font-weight: 600; }
+  .top nav a { color: var(--text-secondary); font-weight: 400; margin-left: var(--space-5); text-decoration: none; }
+  .label { font-size: var(--text-caption); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-secondary); }
+  h1 { font-size: var(--text-display); line-height: var(--leading-title); letter-spacing: -0.02em; font-weight: 600; margin: var(--space-2) 0 var(--space-2); text-wrap: balance; }
+  h2 { font-size: var(--text-title); line-height: var(--leading-title); letter-spacing: -0.01em; font-weight: 600; margin: var(--space-8) 0 var(--space-4); }
+  .lead { color: var(--text-secondary); margin: 0 0 var(--space-6); }
+  .book { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .book th { text-align: left; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); }
+  .book td { padding: var(--space-3); border-bottom: 1px solid var(--border-subtle); vertical-align: baseline; }
+  .book td + td, .book th + th { border-left: 1px solid var(--border-subtle); }
+  .book .no { width: 2.5rem; color: var(--text-secondary); }
+  .book .num { text-align: right; white-space: nowrap; }
+  .book tr.current { background: var(--surface); }
+  .book tr.closed td { color: var(--text-disabled); }
+  .book a { color: var(--text); font-weight: 500; text-underline-offset: 0.18em; }
+  .mark { display: inline-flex; align-items: baseline; gap: var(--space-2); white-space: nowrap; }
+  .hand { font-family: var(--font-hand); font-size: 1.375rem; line-height: 1; color: var(--accent-text); transform: rotate(-3deg); display: inline-block; }
+  .tag { font-size: var(--text-sm); padding: 2px var(--space-2); border: 1px solid; white-space: nowrap; }
+  .tag.ok { color: var(--success-text); background: var(--success-bg); border-color: var(--success-border); }
+  .tag.warn { color: var(--warning-text); background: var(--warning-bg); border-color: var(--warning-border); }
+  .tag.wait { color: var(--text-secondary); border-color: var(--border); }
+  .progress { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-5); justify-content: space-between; margin-top: var(--space-3); color: var(--text-secondary); font-size: var(--text-sm); }
+  .bar { display: grid; grid-template-columns: repeat(8, 1fr); border: 1px solid var(--border); margin-top: var(--space-5); height: 10px; }
+  .bar span + span { border-left: 1px solid var(--border); }
+  .bar .done { background: var(--accent); }
+  .bar .half { background: var(--accent-subtle); }
+  @media (max-width: 560px) {
+    .book thead { display: none; }
+    .book tr { display: grid; grid-template-columns: 2rem 1fr auto; column-gap: var(--space-2); padding: var(--space-3) 0; border-bottom: 1px solid var(--border-subtle); }
+    .book td { border: 0 !important; padding: 0; }
+    .book td.no { grid-row: span 2; width: auto; }
+    .book td:nth-child(2) { grid-column: 2 / 4; margin-bottom: var(--space-1); }
+    .book td.num { grid-column: 3; grid-row: 2; }
+    .book td:nth-child(4) { grid-column: 2; grid-row: 2; }
+    .book td.num::before { content: 'тест '; color: var(--text-secondary); font-size: var(--text-sm); }
+    .book tr.current { padding-left: var(--space-2); padding-right: var(--space-2); margin: 0 calc(-1 * var(--space-2)); }
+    .top { flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
+    .top nav a { margin: 0 var(--space-4) 0 0; }
+  }
+  .btn { font: 500 var(--text-body)/1 var(--font); padding: 0.75rem 1.25rem; border: 1px solid transparent; border-radius: var(--radius-control); background: var(--accent); color: var(--on-accent); cursor: pointer; min-height: 44px; }
+  .btn.hover { background: var(--accent-hover); }
+  .btn.focus { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+  .btn:disabled { background: var(--surface-hover); color: var(--text-disabled); cursor: not-allowed; }
+  .row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; margin-bottom: var(--space-4); }
+  .field { display: grid; gap: var(--space-1); margin-bottom: var(--space-4); max-width: 420px; }
+  .field label { font-weight: 500; font-size: var(--text-sm); }
+  .field input { font: inherit; padding: 0.625rem 0.75rem; border: 1px solid var(--border-input); border-radius: var(--radius-control); background: var(--bg); color: var(--text); min-height: 44px; }
+  .field input.focus { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+  .field input.err { border-color: var(--danger-fill); }
+  .field .msg { font-size: var(--text-sm); color: var(--danger-text); }
+  .q { border-top: 1px solid var(--border-subtle); padding: var(--space-4) 0; }
+  .q p { margin: 0 0 var(--space-2); }
+  .q .ans { font-size: var(--text-sm); color: var(--text-secondary); }
+  .q .verdict { font-weight: 600; }
+  .verdict.no { color: var(--danger-text); }
+  .verdict.yes { color: var(--success-text); }
+  .score { display: flex; align-items: baseline; gap: var(--space-4); padding: var(--space-4) 0; }
+  .score b { font-size: var(--text-display); font-variant-numeric: tabular-nums; }
+  .read { font-size: var(--text-read); line-height: 1.6; max-width: var(--measure); }
+  .read a { color: var(--accent-text); text-underline-offset: 0.18em; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); font-size: var(--text-caption); }
+  .sw { border: 1px solid var(--border-subtle); padding: var(--space-3); }
+  .sw i { display: block; height: 40px; margin-bottom: var(--space-2); border: 1px solid var(--border-subtle); }
+  .scale p { margin: 0 0 var(--space-2); }
+</style>
+</head>
+<body>
+<header class="top"><span>Учимся работать с Claude</span><nav><a href="#">Программа</a><a href="#">Профиль</a></nav></header>
+<main class="wrap">
+  <div class="label">Зачётная книжка</div>
+  <h1>Анна Ковалёва</h1>
+  <p class="lead">Следующий шаг – тест урока 3. Урок 4 откроется, когда тест будет сдан на 6 из 8.</p>
+
+  <table class="book">
+    <thead><tr><th class="label no">№</th><th class="label">Урок</th><th class="label num">Тест</th><th class="label">Задание</th></tr></thead>
+    <tbody>
+      <tr><td class="no">1</td><td><a href="#">Знакомство</a></td><td class="num">7 из 8</td><td><span class="mark"><span class="hand" aria-hidden="true">Зачтено, М.</span><span class="tag ok">принято</span></span></td></tr>
+      <tr><td class="no">2</td><td><a href="#">Как ставить задачу</a></td><td class="num">6 из 8</td><td><span class="tag warn">на доработку</span></td></tr>
+      <tr class="current"><td class="no">3</td><td><a href="#">Файлы</a></td><td class="num">4 из 8</td><td><span class="tag wait">не сдано</span></td></tr>
+      <tr class="closed"><td class="no">4</td><td>Поиск и исследования</td><td class="num">–</td><td>закрыт</td></tr>
+      <tr class="closed"><td class="no">5</td><td>Готовые результаты</td><td class="num">–</td><td>закрыт</td></tr>
+    </tbody>
+  </table>
+  <div class="bar" role="img" aria-label="Пройдено 1 урок из 8, ещё 2 в работе"><span class="done"></span><span class="half"></span><span class="half"></span><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="progress"><span>Пройдено 1 из 8</span><span>Лучший результат засчитывается</span></div>
+
+  <h2>Кнопка и поле</h2>
+  <div class="row"><button class="btn">Сдать тест</button><button class="btn hover">Наведение</button><button class="btn focus">Фокус</button><button class="btn" disabled>Неактивна</button></div>
+  <div class="field"><label for="e1">Почта</label><input id="e1" value="anna@example.com"></div>
+  <div class="field"><label for="e2">Ссылка на работу</label><input id="e2" class="focus" value="https://claude.ai/share/…"></div>
+  <div class="field"><label for="e3">Ссылка на работу</label><input id="e3" class="err" value="claude чат"><span class="msg">Нужна ссылка, которая начинается с https:// – её даёт кнопка «Поделиться» в чате.</span></div>
+
+  <h2>Разбор теста</h2>
+  <div class="score"><b>7 из 8</b><span class="tag ok">тест сдан</span><span class="lead" style="margin:0">проходной – 6</span></div>
+  <div class="q"><p><span class="verdict no">Вопрос 3 – неверно.</span> Claude уверенно назвал дату закона. Что сделать первым?</p><p class="ans">Ваш ответ: поверить, раз ответ уверенный. Верно: попросить источник и открыть его. Уверенный тон не говорит о точности – проверяйте факты, от которых зависит решение.</p></div>
+  <div class="q"><p><span class="verdict yes">Вопрос 4 – верно.</span> Что добавить в запрос, чтобы ответ пришёл таблицей?</p></div>
+
+  <h2>Текст урока</h2>
+  <div class="read"><p>Claude читает PDF, таблицы и сканы. Ниже – как просить так, чтобы он не додумывал недостающие цифры, а говорил «в документе этого нет». Подробнее – в <a href="#">справке Claude о файлах</a>.</p></div>
+
+  <h2>Шкала</h2>
+  <div class="scale">
+    <p style="font-size:var(--text-display);font-weight:600;letter-spacing:-0.02em">32 · Заголовок экрана</p>
+    <p style="font-size:var(--text-title);font-weight:600">24 · Раздел урока</p>
+    <p style="font-size:var(--text-heading);font-weight:600">18 · Заголовок блока</p>
+    <p style="font-size:var(--text-read)">17 · Текст урока</p>
+    <p>16 · Интерфейс</p>
+    <p style="font-size:var(--text-sm)">14 · Мелкий</p>
+    <p class="label">13 · Подпись графы</p>
+    <p>Үйдегі әже қызына ұзақ өмір тіледі: ғажап һәм шаңғы · ӘҒҚҢӨҰҮҺІ</p>
+  </div>
+
+  <h2>Цвет</h2>
+  <div class="swatches">
+    <div class="sw"><i style="background:var(--bg)"></i>--bg</div>
+    <div class="sw"><i style="background:var(--surface)"></i>--surface</div>
+    <div class="sw"><i style="background:var(--text)"></i>--text</div>
+    <div class="sw"><i style="background:var(--text-secondary)"></i>--text-secondary</div>
+    <div class="sw"><i style="background:var(--accent)"></i>--accent · чернила</div>
+    <div class="sw"><i style="background:var(--success-bg)"></i>--success · принято</div>
+    <div class="sw"><i style="background:var(--warning-bg)"></i>--warning · доработка</div>
+    <div class="sw"><i style="background:var(--danger-bg)"></i>--danger · ошибка</div>
+  </div>
+</main>
+</body>
+</html>
