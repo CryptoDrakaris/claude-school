@@ -80,7 +80,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profileError,
     reloadProfile: () => loadProfile(session),
     signOut: async () => {
-      await supabase?.auth.signOut();
+      // Только это устройство; локальная сессия удаляется до запроса в сеть,
+      // поэтому выход срабатывает и без связи (аудит N3).
+      await supabase?.auth.signOut({ scope: 'local' });
       setProfile(null);
       window.location.hash = '#/';
     },
