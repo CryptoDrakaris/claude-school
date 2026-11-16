@@ -38,7 +38,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq('id', s.user.id)
       .maybeSingle();
     if (error || !data) {
-      setProfile(null);
+      // Перечитывание при возврате во вкладку могло упасть из-за сети: профиль того же
+      // пользователя оставляем, иначе урок размонтируется и несданные ответы пропадут (аудит N2).
+      setProfile((prev) => (prev && prev.id === s.user.id ? prev : null));
       setProfileError('Не удалось загрузить профиль. Обновите страницу; если не поможет – напишите владельцу.');
     } else {
       setProfile(data as Profile);
