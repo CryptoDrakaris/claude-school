@@ -43,6 +43,12 @@ export function Join({ code }: { code: string }) {
     const code_ = error.code ?? '';
     if (code_.startsWith('over_') || error.status === 429) {
       setState({ kind: 'error', message: 'Писем за последний час было слишком много. Попробуйте через час.' });
+    } else if (code_ === 'signup_disabled' || code_ === 'otp_disabled' || /signups? not allowed/i.test(error.message)) {
+      // В панели Supabase выключена регистрация (Allow new users to sign up).
+      setState({
+        kind: 'error',
+        message: 'Регистрация на сайте сейчас закрыта. Напишите владельцу курса – он откроет её в настройках.',
+      });
     } else if (/database error|unexpected_failure/i.test(`${code_} ${error.message}`)) {
       // Триггер регистрации отклонил код: истёк, отозван или уже использован.
       setState({ kind: 'invalid' });
