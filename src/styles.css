@@ -111,7 +111,7 @@ a { color: var(--accent-text); text-underline-offset: 0.18em; }
 .book .no { width: 2.5rem; color: var(--text-secondary); }
 .book .num { text-align: right; white-space: nowrap; }
 .book tr.current { background: var(--surface); }
-.book tr.closed td { color: var(--text-disabled); }
+.book tr.closed td { color: var(--text-secondary); } /* названия закрытых уроков – содержание, а не неактивный элемент: нужен AA */
 .book a { color: var(--text); font-weight: 500; }
 .book a:hover { color: var(--accent-text); }
 
@@ -201,3 +201,52 @@ a { color: var(--accent-text); text-underline-offset: 0.18em; }
 .field .muted { margin: 0; }
 .pre { white-space: pre-wrap; }
 .homework .facts { margin-top: 0; padding-top: 0; border-top: 0; }
+
+/* Ведомость владельца */
+.btn-secondary {
+  font: 500 var(--text-body) / 1.2 var(--font);
+  padding: 0.75rem 1.25rem; min-height: 44px; cursor: pointer;
+  color: var(--text); background: var(--bg);
+  border: 1px solid var(--border-input); border-radius: var(--radius-control);
+}
+.btn-secondary:hover:not(:disabled) { background: var(--surface-hover); }
+.btn-secondary:disabled { color: var(--text-disabled); cursor: not-allowed; }
+
+.nowrap { white-space: nowrap; }
+.break { overflow-wrap: anywhere; }
+
+.review-card { border-top: 1px solid var(--border); padding: var(--space-5) 0 var(--space-6); max-width: 760px; }
+.review-card h3 { margin-top: 0; }
+.review-card > p { margin: 0 0 var(--space-2); }
+.student-comment { margin: var(--space-3) 0 var(--space-5); padding: var(--space-3) var(--space-4); background: var(--surface); white-space: pre-wrap; }
+.criterion { border: 0; padding: 0; margin: 0 0 var(--space-4); }
+.criterion legend { padding: 0; margin-bottom: var(--space-2); font-weight: 500; }
+.criterion legend .muted { font-weight: 400; }
+.seg { display: inline-flex; border: 1px solid var(--border-input); }
+.seg-option { position: relative; }
+.seg-option + .seg-option { border-left: 1px solid var(--border-input); }
+.seg-option input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.seg-option span { display: grid; place-items: center; min-width: 48px; min-height: 44px; font-variant-numeric: tabular-nums; }
+.seg-option input:checked + span { background: var(--accent); color: var(--on-accent); }
+.seg-option input:focus-visible + span { outline: 2px solid var(--focus-ring); outline-offset: 2px; position: relative; }
+.total { margin: 0 0 var(--space-4); }
+.total b { font-size: var(--text-title); font-variant-numeric: tabular-nums; }
+
+.legend-line { max-width: var(--measure); }
+.table-scroll { overflow-x: auto; border: 1px solid var(--border-subtle); }
+.table-scroll:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+.ledger { border-collapse: collapse; width: 100%; font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.ledger th, .ledger td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border-subtle); text-align: left; vertical-align: top; }
+.ledger td + td, .ledger th + th, .ledger th + td { border-left: 1px solid var(--border-subtle); }
+.ledger thead th { border-bottom-color: var(--border); }
+.ledger tbody th { font-weight: 500; font-size: var(--text-body); min-width: 9rem; }
+.sticky-col { position: sticky; left: 0; background: var(--bg); z-index: 1; }
+.cell { min-width: 6.5rem; }
+.cell.lag { background: var(--danger-bg); }
+.cell-body { display: grid; gap: var(--space-1); justify-items: start; }
+.cell-score { font-weight: 500; }
+.lag-word { color: var(--danger-text); font-weight: 500; }
+.cell-action {
+  font: inherit; font-size: var(--text-sm); color: var(--accent-text); background: none; border: 0; padding: var(--space-1) 0;
+  text-decoration: underline; text-underline-offset: 0.18em; cursor: pointer; min-height: 32px; text-align: left;
+}

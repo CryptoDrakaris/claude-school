@@ -95,7 +95,7 @@ export function Program() {
                     '–'
                   )}
                 </td>
-                <td>{rows ? <Mark status={status} /> : null}</td>
+                <td>{rows ? isAdmin ? <span className="muted">–</span> : <Mark status={status} /> : null}</td>
               </tr>
             );
           })}

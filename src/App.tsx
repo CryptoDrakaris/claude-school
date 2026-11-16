@@ -7,6 +7,7 @@ import { Login } from './pages/Login';
 import { Profile } from './pages/Profile';
 import { Program } from './pages/Program';
 import { Lesson } from './pages/Lesson';
+import { Admin } from './pages/Admin';
 
 export function App() {
   const route = useRoute();
@@ -71,16 +72,7 @@ export function App() {
       <Header route={route} profile={profile} />
       {route.name === 'program' && <Program />}
       {route.name === 'lesson' && <Lesson key={route.id} id={route.id} />}
-      {route.name === 'admin' &&
-        (profile.role === 'admin' ? (
-          <main id="main" className="page page-wide">
-            <p className="label">Владелец курса</p>
-            <h1>Ведомость</h1>
-            <p className="lead">Таблица прогресса и очередь заданий появятся на этапе 6.</p>
-          </main>
-        ) : (
-          <NotFound />
-        ))}
+      {route.name === 'admin' && (profile.role === 'admin' ? <Admin /> : <NotFound />)}
       {route.name === 'profile' && <Profile />}
       {route.name === 'not-found' && <NotFound />}
     </>
