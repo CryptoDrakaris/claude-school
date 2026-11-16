@@ -93,5 +93,14 @@ await as(ADM, `select lagging from public.admin_progress(array[1]) where user_id
 await as(ADM, `select lagging, hw_status from public.admin_progress(array[1]) where user_id='${C}' and lesson_id=1`, (r) => r[0].lagging === true);
 await as(C, `select * from public._progress('${C}', array[1])`, 'error');
 
+// Регрессия аудита C3: до сдачи теста разбор без правильных ответов и объяснений, после сдачи – полный.
+const D = '00000000-0000-0000-0000-0000000000d0';
+await db.exec(`insert into auth.users values ('${D}','d@t.test', now())`);
+const hidden = (r) => r[0].r.revealed === false && r[0].r.review.every((x) => x.correct === null && x.explanation === null && typeof x.is_correct === 'boolean');
+await as(D, `select public.submit_quiz(1, '[4,4,4,4,4,4,4,4]') r`, hidden);
+await as(D, `select public.submit_quiz(1, '[2,3,4,1,2,3,4,1]') r`, hidden);
+await as(D, `select public.submit_quiz(1, '[1,2,3,4,1,2,3,4]') r`, (r) => r[0].r.passed && r[0].r.revealed && r[0].r.review.every((x) => x.correct !== null && x.explanation));
+await as(D, `select public.submit_quiz(1, '[4,4,4,4,4,4,4,4]') r`, (r) => !r[0].r.passed && r[0].r.revealed && r[0].r.review[0].correct === 1);
+
 console.log(fails ? `\n${fails} FAIL` : '\nвсё прошло');
 process.exit(fails ? 1 : 0);

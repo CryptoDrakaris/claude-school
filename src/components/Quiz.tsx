@@ -3,12 +3,13 @@ import { supabase } from '../lib/supabase';
 import type { QuizQuestion } from '../lib/content';
 import type { ProgressRow } from '../lib/progress';
 
+// До сдачи теста сервер не присылает правильный вариант и объяснение (correct/explanation = null).
 interface ReviewItem {
   question_no: number;
   chosen: number;
-  correct: number;
+  correct: number | null;
   is_correct: boolean;
-  explanation: string;
+  explanation: string | null;
 }
 
 interface QuizResult {
@@ -16,6 +17,7 @@ interface QuizResult {
   max_score: number;
   pass_mark: number;
   passed: boolean;
+  revealed?: boolean;
   best_score: number;
   review: ReviewItem[];
 }
@@ -112,7 +114,9 @@ export function Quiz({
                 ? `Урок ${nextLesson.id} открыт. Не забудьте сдать задание этого урока.`
                 : `Урок ${nextLesson.id} откроется, как только будет готов. Не забудьте сдать задание этого урока.`
               : 'Это последний тест курса. Осталось сдать задание.'
-            : `Нужно ${result.pass_mark} верных. Прочитайте разбор и попробуйте ещё раз – в зачёт пойдёт лучший результат.`}
+            : result.revealed === false
+              ? `Нужно ${result.pass_mark} верных. Перечитайте теорию по вопросам с отметкой «неверно» и попробуйте ещё раз – в зачёт пойдёт лучший результат. Правильные ответы и объяснения откроются, когда тест будет сдан.`
+              : `Нужно ${result.pass_mark} верных. Прочитайте разбор и попробуйте ещё раз – в зачёт пойдёт лучший результат.`}
           {result.best_score > result.score && ` Ваш лучший результат – ${result.best_score}.`}
         </p>
 
@@ -129,10 +133,11 @@ export function Quiz({
                 </p>
                 {!r.is_correct && (
                   <p className="muted">
-                    Ваш ответ: {q.options[r.chosen - 1]}. Верно: {q.options[r.correct - 1]}.
+                    Ваш ответ: {q.options[r.chosen - 1]}.
+                    {r.correct != null && <> Верно: {q.options[r.correct - 1]}.</>}
                   </p>
                 )}
-                <p className="muted">{r.explanation}</p>
+                {r.explanation && <p className="muted">{r.explanation}</p>}
               </li>
             );
           })}
