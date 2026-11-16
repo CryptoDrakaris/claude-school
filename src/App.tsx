@@ -8,6 +8,7 @@ import { Profile } from './pages/Profile';
 import { Program } from './pages/Program';
 import { Lesson } from './pages/Lesson';
 import { Admin } from './pages/Admin';
+import { Join } from './pages/Join';
 
 export function App() {
   const route = useRoute();
@@ -41,7 +42,7 @@ export function App() {
     return (
       <>
         <Header route={route} profile={null} />
-        <Login />
+        {route.name === 'join' ? <Join code={route.code} /> : <Login />}
       </>
     );
   }
@@ -75,7 +76,20 @@ export function App() {
       {route.name === 'admin' && (profile.role === 'admin' ? <Admin /> : <NotFound />)}
       {route.name === 'profile' && <Profile />}
       {route.name === 'not-found' && <NotFound />}
+      {route.name === 'join' && <AlreadyIn />}
     </>
+  );
+}
+
+// Пришёл по ссылке-приглашению, уже войдя в курс.
+function AlreadyIn() {
+  return (
+    <main id="main" className="page page-narrow">
+      <h1>Вы уже в курсе</h1>
+      <p className="lead">
+        Приглашение не нужно: вы вошли. <a href="#/">Открыть зачётку</a>
+      </p>
+    </main>
   );
 }
 

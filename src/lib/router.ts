@@ -6,6 +6,7 @@ export type Route =
   | { name: 'lesson'; id: number }
   | { name: 'admin' }
   | { name: 'profile' }
+  | { name: 'join'; code: string }
   | { name: 'not-found' };
 
 export function parseHash(hash: string): Route {
@@ -17,6 +18,8 @@ export function parseHash(hash: string): Route {
   if (lesson) return { name: 'lesson', id: Number(lesson[1]) };
   if (path === '/admin') return { name: 'admin' };
   if (path === '/profile') return { name: 'profile' };
+  const join = path.match(/^\/join\/([A-Za-z0-9_-]{12,64})$/);
+  if (join) return { name: 'join', code: join[1] };
   return { name: 'not-found' };
 }
 

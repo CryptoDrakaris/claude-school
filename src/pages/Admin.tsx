@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
 import { program } from '../lib/content';
 import { STATUS_TEXT, lessonStatus, type ProgressRow } from '../lib/progress';
+import { Invites } from '../components/Invites';
 
 // Экран владельца. Вопрос экрана: кого проверить и кто отстаёт.
 
@@ -195,6 +196,8 @@ export function Admin() {
           </>
         )}
       </section>
+
+      <Invites />
     </main>
   );
 }
