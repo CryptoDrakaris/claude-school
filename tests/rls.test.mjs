@@ -13,6 +13,17 @@ if (!url || !anonKey || !serviceKey) {
 }
 
 const opts = { auth: { persistSession: false, autoRefreshToken: false } };
+// Регистрация только по приглашению (миграция 0005) действует и для служебных скриптов:
+// создаём одноразовый код ключом service role и сразу им пользуемся.
+async function createInvitedUser(db, email) {
+  const code = 'script-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+  const ins = await db.from('invites').insert({ code, max_uses: 1, note: 'служебный скрипт' });
+  if (ins.error) throw ins.error;
+  const res = await db.auth.admin.createUser({ email, email_confirm: true, user_metadata: { invite: code } });
+  await db.from('invites').delete().eq('code', code);
+  return res;
+}
+
 const admin = createClient(url, serviceKey, opts);
 const stamp = Date.now();
 const emails = { a: `rls-a-${stamp}@example.com`, b: `rls-b-${stamp}@example.com` };
@@ -28,7 +39,7 @@ const refused = (r) => Boolean(r.error) || (Array.isArray(r.data) && r.data.leng
 const why = (r) => r.error?.message ?? `строк: ${r.data?.length ?? 0}`;
 
 async function makeUser(email) {
-  const { data, error } = await admin.auth.admin.createUser({ email, email_confirm: true });
+  const { data, error } = await createInvitedUser(admin, email);
   if (error) throw error;
   created.push(data.user.id);
   // Сессия без письма: ссылка генерируется на сервере и сразу подтверждается.
