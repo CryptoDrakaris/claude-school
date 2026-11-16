@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { loadLesson, program, renderMarkdown, type LessonContent } from '../lib/content';
 import { useAuth } from '../lib/auth';
 import { lessonStatus, useProgress } from '../lib/progress';
+import { Quiz } from '../components/Quiz';
+import { Homework } from '../components/Homework';
 
 const STEPS = [
   { id: 'theory', title: 'Теория' },
@@ -20,7 +22,8 @@ function goTo(id: string) {
 export function Lesson({ id }: { id: number }) {
   const meta = program.find((l) => l.id === id)!;
   const { profile } = useAuth();
-  const { rows } = useProgress();
+  const { rows, reload } = useProgress();
+  const next = program.find((l) => l.id === id + 1) ?? null;
   const [content, setContent] = useState<LessonContent | null>(null);
 
   useEffect(() => {
@@ -99,25 +102,14 @@ export function Lesson({ id }: { id: number }) {
             {content.quiz.length} вопросов, в каждом один верный ответ. Засчитывается от 6 верных; пересдавать можно
             сколько угодно, в зачёт идёт лучший результат.
           </p>
-          <form className="quiz" onSubmit={(e) => e.preventDefault()}>
-            {content.quiz.map((q, qi) => (
-              <fieldset key={qi} className="q">
-                <legend>
-                  <span className="q-no">{qi + 1}.</span> {q.text}
-                </legend>
-                {q.options.map((opt, oi) => (
-                  <label key={oi} className="option">
-                    <input type="radio" name={`q${qi}`} value={oi + 1} />
-                    <span>{opt}</span>
-                  </label>
-                ))}
-              </fieldset>
-            ))}
-            <button type="submit" className="btn" disabled>
-              Сдать тест
-            </button>
-            <p className="muted">Отправка теста заработает на следующем этапе.</p>
-          </form>
+          <Quiz
+            lessonId={id}
+            questions={content.quiz}
+            row={row}
+            canSubmit={!isAdmin}
+            nextLesson={next ? { id: next.id, title: next.title, ready: next.ready } : null}
+            onSubmitted={reload}
+          />
         </section>
       )}
 
@@ -125,7 +117,8 @@ export function Lesson({ id }: { id: number }) {
         <section id="homework" tabIndex={-1} aria-labelledby="h-homework" className="lesson-section">
           <h2 id="h-homework">Задание</h2>
           <div className="prose" dangerouslySetInnerHTML={{ __html: html.homework }} />
-          <p className="muted">Форма сдачи задания появится на следующем этапе.</p>
+          <h3 className="hw-form-title">Сдать задание</h3>
+          <Homework lessonId={id} canSubmit={!isAdmin} onChanged={reload} />
         </section>
       )}
 

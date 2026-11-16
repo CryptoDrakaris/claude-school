@@ -28,6 +28,7 @@ function nextStep(rows: ProgressRow[]): string {
     const row = byId.get(meta.id);
     const status = lessonStatus(row);
     if (status === 'closed') return `Урок ${meta.id} откроется, когда тест урока ${meta.id - 1} будет сдан на 6 из 8.`;
+    if (status === 'open' && !meta.ready) return `Урок ${meta.id}, «${meta.title}», ещё готовится – владелец курса сообщит, когда он появится.`;
     if (status === 'open') return `Следующий шаг – урок ${meta.id}, «${meta.title}»: прочитать, сделать практику, сдать тест.`;
     if (status === 'test-passed') return `Тест урока ${meta.id} сдан. Осталось сдать задание.`;
     if (status === 'hw-rework') return `Задание урока ${meta.id} вернули на доработку – посмотрите комментарий.`;
