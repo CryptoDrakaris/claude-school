@@ -153,7 +153,7 @@ a { color: var(--accent-text); text-underline-offset: 0.18em; }
 
 .prose { font-size: var(--text-read); line-height: 1.6; max-width: var(--measure); }
 .prose h3 { font-size: var(--text-heading); margin: var(--space-6) 0 var(--space-2); }
-.prose h4 { font-size: var(--text-body); margin: var(--space-5) 0 var(--space-2); }
+.prose h4 { font-size: var(--text-read); margin: var(--space-5) 0 var(--space-2); }
 .prose ul, .prose ol { padding-left: 1.4em; }
 .prose li + li { margin-top: var(--space-1); }
 .prose blockquote { margin: var(--space-4) 0; padding: var(--space-3) var(--space-4); background: var(--surface); border-left: 3px solid var(--border); }
