@@ -55,4 +55,13 @@ update public.profiles set role = 'admin'
 where id = (select id from auth.users where email = 'ваша@почта');
 ```
 
-Раздел «Как добавить урок» появится на этапе 4.
+## Как добавить урок
+
+1. Папка `content/lessons/NN-slug/` (номер с нулём впереди), в ней:
+   - `lesson.md` – теория, 5–10 минут чтения; первая строка `# Название` (на странице она не повторяется); в конце строка «Проверено: ДД.ММ.ГГГГ» со ссылками на support.claude.com и claude.com;
+   - `practice.md` – практика на своей задаче, 40–60 минут;
+   - `quiz.json` – `{"questions": [{"text": "…", "options": ["…", "…", "…", "…"]}]}`, 8 вопросов, **без правильных ответов**;
+   - `homework.md` – что сдать и как оценивается.
+2. В `content/program.json` у урока поставить `"ready": true`.
+3. Ключи – в `supabase/seed/quiz_keys.json` (номер верного варианта с 1 и объяснение), затем `npm run seed:keys`.
+4. `npm run check` – типографика, секреты, сборка. Пуш в `main` выкладывает сайт.

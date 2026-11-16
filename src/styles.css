@@ -100,3 +100,80 @@ a { color: var(--accent-text); text-underline-offset: 0.18em; }
 @media (prefers-reduced-motion: no-preference) {
   .btn, .site-header nav a { transition: background-color var(--dur-hover) var(--ease-out), color var(--dur-hover) var(--ease-out); }
 }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Зачётка: строка – урок, графы – тест и задание */
+.book { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.book th { text-align: left; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); }
+.book td { padding: var(--space-3); border-bottom: 1px solid var(--border-subtle); vertical-align: baseline; }
+.book td + td, .book th + th { border-left: 1px solid var(--border-subtle); }
+.book .no { width: 2.5rem; color: var(--text-secondary); }
+.book .num { text-align: right; white-space: nowrap; }
+.book tr.current { background: var(--surface); }
+.book tr.closed td { color: var(--text-disabled); }
+.book a { color: var(--text); font-weight: 500; }
+.book a:hover { color: var(--accent-text); }
+
+.mark { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2); }
+.hand { font-family: var(--font-hand); font-size: 1.375rem; line-height: 1; color: var(--accent-text); display: inline-block; transform: rotate(-3deg); }
+
+.tag { display: inline-block; font-size: var(--text-sm); line-height: 1.4; padding: 1px var(--space-2); border: 1px solid; white-space: nowrap; }
+.tag-ok { color: var(--success-text); background: var(--success-bg); border-color: var(--success-border); }
+.tag-warn { color: var(--warning-text); background: var(--warning-bg); border-color: var(--warning-border); }
+.tag-wait { color: var(--text-secondary); border-color: var(--border); }
+
+.bar { display: grid; grid-template-columns: repeat(8, 1fr); border: 1px solid var(--border); margin-top: var(--space-5); height: 10px; }
+.bar span + span { border-left: 1px solid var(--border); }
+.bar .done { background: var(--accent); }
+.bar .half { background: var(--accent-subtle); }
+.progress { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-5); justify-content: space-between; margin-top: var(--space-3); color: var(--text-secondary); font-size: var(--text-sm); }
+
+@media (max-width: 560px) {
+  .book thead { display: none; }
+  .book tr { display: grid; grid-template-columns: 2rem 1fr auto; column-gap: var(--space-2); padding: var(--space-3) 0; border-bottom: 1px solid var(--border-subtle); }
+  .book td { border: 0 !important; padding: 0; }
+  .book td.no { grid-row: span 2; width: auto; }
+  .book td:nth-child(2) { grid-column: 2 / 4; margin-bottom: var(--space-1); }
+  .book td.num { grid-column: 3; grid-row: 2; }
+  .book td:nth-child(4) { grid-column: 2; grid-row: 2; }
+  .book td.num::before { content: 'тест '; color: var(--text-secondary); font-size: var(--text-sm); }
+  .book tr.current { padding-left: var(--space-2); padding-right: var(--space-2); margin: 0 calc(-1 * var(--space-2)); }
+}
+
+/* Урок */
+.steps ol { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-2); padding: 0; margin: 0 0 var(--space-6); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+.steps button { font: inherit; color: var(--text); background: none; border: 0; padding: var(--space-3) var(--space-3) var(--space-3) 0; min-height: 44px; cursor: pointer; }
+.steps button:hover { color: var(--accent-text); }
+.steps-no { font-variant-numeric: tabular-nums; color: var(--text-secondary); margin-right: var(--space-1); }
+
+.lesson-section { scroll-margin-top: var(--space-5); }
+.lesson-section:focus { outline: none; }
+.lesson-section + .lesson-section { border-top: 1px solid var(--border-subtle); margin-top: var(--space-7); }
+
+.prose { font-size: var(--text-read); line-height: 1.6; max-width: var(--measure); }
+.prose h3 { font-size: var(--text-heading); margin: var(--space-6) 0 var(--space-2); }
+.prose h4 { font-size: var(--text-body); margin: var(--space-5) 0 var(--space-2); }
+.prose ul, .prose ol { padding-left: 1.4em; }
+.prose li + li { margin-top: var(--space-1); }
+.prose blockquote { margin: var(--space-4) 0; padding: var(--space-3) var(--space-4); background: var(--surface); border-left: 3px solid var(--border); }
+.prose blockquote p { margin: 0; }
+.prose table { width: 100%; border-collapse: collapse; font-size: var(--text-body); margin: var(--space-4) 0; }
+.prose th, .prose td { text-align: left; vertical-align: top; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border-subtle); }
+.prose th { border-bottom-color: var(--border); font-weight: 600; }
+.prose hr { border: 0; border-top: 1px solid var(--border-subtle); margin: var(--space-7) 0 var(--space-4); }
+.prose hr + p { font-size: var(--text-sm); color: var(--text-secondary); }
+.prose code { font-size: 0.92em; background: var(--surface); padding: 0 0.25em; }
+@media (max-width: 560px) {
+  .prose table { display: block; overflow-x: auto; }
+}
+
+/* Тест */
+.quiz .q { border: 0; border-top: 1px solid var(--border-subtle); margin: 0; padding: var(--space-5) 0; max-width: var(--measure); }
+.quiz legend { float: left; width: 100%; padding: 0; font-weight: 500; margin-bottom: var(--space-3); }
+.quiz legend + .option { clear: both; }
+.q-no { font-variant-numeric: tabular-nums; color: var(--text-secondary); }
+.option { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-2) 0; cursor: pointer; min-height: 44px; }
+.option input { margin-top: 0.3em; width: 1.1em; height: 1.1em; accent-color: var(--accent); flex: none; }
+
+.lesson-nav { display: flex; justify-content: space-between; gap: var(--space-5); margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid var(--border-subtle); }

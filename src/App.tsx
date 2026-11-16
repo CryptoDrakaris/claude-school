@@ -5,6 +5,8 @@ import { useAuth } from './lib/auth';
 import { Header } from './components/Header';
 import { Login } from './pages/Login';
 import { Profile } from './pages/Profile';
+import { Program } from './pages/Program';
+import { Lesson } from './pages/Lesson';
 
 export function App() {
   const route = useRoute();
@@ -67,20 +69,8 @@ export function App() {
   return (
     <>
       <Header route={route} profile={profile} />
-      {route.name === 'program' && (
-        <main id="main" className="page">
-          <p className="label">Зачётная книжка</p>
-          <h1>{profile.full_name}</h1>
-          <p className="lead">Программа из восьми уроков появится здесь на следующем этапе.</p>
-        </main>
-      )}
-      {route.name === 'lesson' && (
-        <main id="main" className="page">
-          <p className="label">Урок {route.id}</p>
-          <h1>Урок {route.id}</h1>
-          <p className="lead">Содержание уроков появится на следующем этапе.</p>
-        </main>
-      )}
+      {route.name === 'program' && <Program />}
+      {route.name === 'lesson' && <Lesson key={route.id} id={route.id} />}
       {route.name === 'admin' &&
         (profile.role === 'admin' ? (
           <main id="main" className="page page-wide">
