@@ -51,7 +51,8 @@ export function Admin() {
   const load = useCallback(async () => {
     if (!supabase) return;
     const [progress, hw, un] = await Promise.all([
-      supabase.rpc('admin_progress'),
+      // Готовые уроки: «задание не сдано» считается только по ним (аудит C1).
+      supabase.rpc('admin_progress', { p_ready: program.filter((l) => l.ready).map((l) => l.id) }),
       supabase
         .from('homework')
         .select('id, user_id, lesson_id, link, comment, submitted_at')

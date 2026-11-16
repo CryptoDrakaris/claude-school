@@ -9,7 +9,7 @@ const db = new PGlite();
 const stub = `
 create role anon nologin; create role authenticated nologin; create role service_role nologin bypassrls;
 create schema auth;
-create table auth.users (id uuid primary key, email text);
+create table auth.users (id uuid primary key, email text, email_confirmed_at timestamptz);
 create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
 grant usage on schema auth, public to anon, authenticated, service_role;
 grant execute on function auth.uid() to anon, authenticated, service_role;
@@ -70,7 +70,7 @@ await as(null, `select public.submit_quiz(1, '[1,2,3,4,1,2,3,4]')`, 'error');
 await as(B, `select public.is_lesson_open(2) o`, (r) => r[0].o === true);
 await as(B, `update public.homework set link='https://new.link' where user_id='${B}' returning id`, 'empty');
 // владелец
-await as(ADM, `select count(*)::int c from public.admin_progress()`, (r) => r[0].c === 16);
+await as(ADM, `select count(*)::int c from public.admin_progress(array[1])`, (r) => r[0].c === 16);
 await as(ADM, `update public.homework set status='needs_rework', score=3, admin_comment='Добавьте проверку', link='https://hack' where user_id='${B}' returning link, reviewed_at`, (r) => r[0].link === 'https://claude.ai/share/x' && r[0].reviewed_at);
 await as(ADM, `insert into public.lesson_unlocks values ('${A}', 2) returning lesson_id`, (r) => r.length === 1);
 await as(ADM, `select count(*)::int c from public.quiz_keys`, (r) => r[0].c === 8);
@@ -78,6 +78,20 @@ await as(A, `select public.is_lesson_open(2) o`, (r) => r[0].o === true);
 // B пересдаёт задание
 await as(B, `update public.homework set link='https://claude.ai/share/y', status='accepted', score=6 where user_id='${B}' returning status, score, link`, (r) => r[0].status === 'submitted' && r[0].score === 3 && r[0].link.endsWith('/y'));
 await as(B, `select * from public.my_progress()`, (r) => r.length === 8 && r[1].is_open === true && r[2].is_open === false);
+
+// Регрессия аудита C1: «отстаёт» не считается по неготовым урокам (заглушкам без задания).
+const C = '00000000-0000-0000-0000-00000000000c';
+const N = '00000000-0000-0000-0000-00000000000d';
+await db.exec(`insert into auth.users values ('${C}','c@t.test', now() - interval '9 days'), ('${N}','n@t.test', null);
+  update public.profiles set created_at = now() - interval '9 days' where id in ('${C}','${N}');`);
+await as(C, `select public.submit_quiz(1, '[1,2,3,4,1,2,3,4]')`, (r) => true);
+await db.exec(`update public.quiz_attempts set created_at = now() - interval '8 days' where user_id = '${C}'`);
+await as(ADM, `select lagging from public.admin_progress(array[1]) where user_id='${C}' and lesson_id=2`, (r) => r[0].lagging === false);
+await as(ADM, `select lagging from public.admin_progress(array[1,2]) where user_id='${C}' and lesson_id=2`, (r) => r[0].lagging === true);
+// Регрессия аудита N4: урок 1 отсчитывается от первого входа; кто не входил – не «отстаёт».
+await as(ADM, `select lagging from public.admin_progress(array[1]) where user_id='${N}' and lesson_id=1`, (r) => r[0].lagging === false);
+await as(ADM, `select lagging, hw_status from public.admin_progress(array[1]) where user_id='${C}' and lesson_id=1`, (r) => r[0].lagging === true);
+await as(C, `select * from public._progress('${C}', array[1])`, 'error');
 
 console.log(fails ? `\n${fails} FAIL` : '\nвсё прошло');
 process.exit(fails ? 1 : 0);
