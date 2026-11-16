@@ -8,7 +8,7 @@ const all = process.argv.includes('--all');
 const cmd = all ? 'git ls-files' : 'git diff --cached --name-only --diff-filter=ACMR';
 const files = execSync(cmd, { encoding: 'utf8' }).split('\n').filter(Boolean);
 
-const FORBIDDEN_FILES = [/(^|\/)\.env$/, /(^|\/)\.env\.(?!example$)[^/]+$/, /quiz_keys\.sql$/];
+const FORBIDDEN_FILES = [/(^|\/)\.env$/, /(^|\/)\.env\.(?!example$)[^/]+$/, /quiz_keys\.[a-z]+$/];
 
 const PATTERNS = [
   [/eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/, 'JWT (ключ Supabase или токен)'],

@@ -18,4 +18,18 @@ npm run dev            # http://localhost:5173/claude-school/
 - `npm run check:secrets` – ключи и секреты в индексе git (запускается перед каждым коммитом)
 - `npm run check` – всё вместе и сборка
 
-Разделы «Как добавить урок», «Как загрузить ключи ответов», «Как пригласить участника» появятся на этапах 2–7.
+- `npm run test:sql` – миграции и права доступа на локальном Postgres (PGlite), без сети
+- `npm run test:rls` – права доступа на живой базе Supabase (нужен ключ service role в `.env`)
+
+## База данных
+
+Миграции – `supabase/migrations/`, по порядку имён. Применять в Supabase → SQL Editor: вставить файл целиком → Run.
+
+## Как загрузить ключи ответов
+
+1. Заполнить `supabase/seed/quiz_keys.json` (формат – в начале `scripts/seed-keys.mjs`). Файл в git не попадает.
+2. В `.env` вписать `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Project Settings → API Keys → secret key).
+3. `npm run seed:keys`.
+4. Сохранить копию `quiz_keys.json` вне репозитория: в git его нет, потеряется вместе с компьютером.
+
+Разделы «Как добавить урок» и «Как пригласить участника» появятся на этапах 4 и 7.

@@ -9,8 +9,11 @@
     "preview": "vite preview",
     "check:typo": "node scripts/check-typo.mjs",
     "check:secrets": "node scripts/check-secrets.mjs",
-    "check": "npm run check:typo && npm run check:secrets && npm run build",
-    "prepare": "git config core.hooksPath .githooks"
+    "check": "npm run check:typo && npm run check:secrets && npm run test:sql && npm run build",
+    "prepare": "git config core.hooksPath .githooks",
+    "test:sql": "node tests/sql.test.mjs",
+    "test:rls": "node --env-file=.env tests/rls.test.mjs",
+    "seed:keys": "node --env-file=.env scripts/seed-keys.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",
@@ -18,6 +21,7 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.3.0",

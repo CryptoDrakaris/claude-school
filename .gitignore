@@ -9,5 +9,5 @@ dist/
 !.env.example
 
 # ключи ответов на тесты: в публичный репозиторий не попадают
-supabase/seed/quiz_keys.sql
+supabase/seed/quiz_keys.*
 supabase/.temp/

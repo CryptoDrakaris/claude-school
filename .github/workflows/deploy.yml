@@ -25,6 +25,7 @@ jobs:
       - run: npm ci
       - run: npm run check:typo
       - run: npm run check:secrets -- --all
+      - run: npm run test:sql
       - run: npm run build
         env:
           # публичные значения, хранятся в Settings → Secrets and variables → Actions → Variables
