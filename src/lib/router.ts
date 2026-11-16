@@ -9,9 +9,11 @@ export type Route =
   | { name: 'not-found' };
 
 export function parseHash(hash: string): Route {
-  const path = hash.replace(/^#/, '') || '/';
+  // Хэш не нашего вида (#access_token=… из ссылки входа) – это главная.
+  if (!hash.startsWith('#/')) return { name: 'program' };
+  const path = hash.slice(1).split('?')[0];
   if (path === '/') return { name: 'program' };
-  const lesson = path.match(/^\/lesson\/(\d+)$/);
+  const lesson = path.match(/^\/lesson\/([1-8])$/);
   if (lesson) return { name: 'lesson', id: Number(lesson[1]) };
   if (path === '/admin') return { name: 'admin' };
   if (path === '/profile') return { name: 'profile' };
@@ -21,7 +23,10 @@ export function parseHash(hash: string): Route {
 export function useRoute(): Route {
   const [route, setRoute] = useState(() => parseHash(window.location.hash));
   useEffect(() => {
-    const onChange = () => setRoute(parseHash(window.location.hash));
+    const onChange = () => {
+      setRoute(parseHash(window.location.hash));
+      window.scrollTo(0, 0);
+    };
     window.addEventListener('hashchange', onChange);
     return () => window.removeEventListener('hashchange', onChange);
   }, []);

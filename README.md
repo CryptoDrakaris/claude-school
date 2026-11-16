@@ -32,4 +32,27 @@ npm run dev            # http://localhost:5173/claude-school/
 3. `npm run seed:keys`.
 4. Сохранить копию `quiz_keys.json` вне репозитория: в git его нет, потеряется вместе с компьютером.
 
-Разделы «Как добавить урок» и «Как пригласить участника» появятся на этапах 4 и 7.
+## Вход и роли
+
+Вход – по ссылке из письма, без паролей. Самостоятельная регистрация выключена (Supabase → Authentication → Sign In / Providers → «Allow new users to sign up» выключено), войти может только приглашённый.
+
+Адреса, куда разрешено возвращать человека после клика по ссылке (Supabase → Authentication → URL Configuration):
+- Site URL: `https://cryptodrakaris.github.io/claude-school/`
+- Redirect URLs: `https://cryptodrakaris.github.io/claude-school/` и `http://localhost:5173/claude-school/`
+
+### Как пригласить участника
+
+Supabase → Authentication → Users → Add user → Send invitation → почта участника. Профиль с ролью «участник» создаётся сам; имя человек вводит при первом входе.
+
+Встроенная почта Supabase отправляет письма только адресам участников организации Supabase и не больше нескольких в час. Для приглашения друзей нужен свой SMTP (Authentication → Emails → SMTP Settings), например Resend или почтовый ящик с паролем приложения.
+
+### Как назначить владельца
+
+После первого входа владельца – в SQL Editor, подставив свою почту:
+
+```sql
+update public.profiles set role = 'admin'
+where id = (select id from auth.users where email = 'ваша@почта');
+```
+
+Раздел «Как добавить урок» появится на этапе 4.

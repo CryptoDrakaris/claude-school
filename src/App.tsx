@@ -1,38 +1,109 @@
+import { useEffect } from 'react';
 import { useRoute } from './lib/router';
 import { supabaseConfigured } from './lib/supabase';
+import { useAuth } from './lib/auth';
+import { Header } from './components/Header';
+import { Login } from './pages/Login';
+import { Profile } from './pages/Profile';
 
-export const SITE_TITLE = 'Учимся работать с Claude';
-
-// Каркас этапа 1: маршруты есть, страницы появятся на этапах 3–6.
 export function App() {
   const route = useRoute();
+  const { loading, session, profile, profileError } = useAuth();
+
+  // После входа по ссылке в адресе остаётся служебный хэш – приводим к #/.
+  useEffect(() => {
+    if (session && !window.location.hash.startsWith('#/')) {
+      history.replaceState(null, '', `${window.location.pathname}#/`);
+    }
+  }, [session]);
+
+  if (!supabaseConfigured) {
+    return (
+      <main id="main" className="page page-narrow">
+        <h1>Сайт не подключён к базе</h1>
+        <p className="lead">Заполните файл .env по образцу .env.example и перезапустите сборку.</p>
+      </main>
+    );
+  }
+
+  if (loading) {
+    return (
+      <main id="main" className="page page-narrow" aria-busy="true">
+        <p className="muted">Открываем зачётку…</p>
+      </main>
+    );
+  }
+
+  if (!session) {
+    return (
+      <>
+        <Header route={route} profile={null} />
+        <Login />
+      </>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <>
+        <Header route={route} profile={null} />
+        <main id="main" className="page page-narrow">
+          <h1>Профиль не загрузился</h1>
+          <p className="lead">{profileError ?? 'Обновите страницу.'}</p>
+        </main>
+      </>
+    );
+  }
+
+  if (!profile.full_name) {
+    return (
+      <>
+        <Header route={route} profile={profile} />
+        <Profile mode="first" />
+      </>
+    );
+  }
 
   return (
     <>
-      <header className="site-header">
-        <a href="#/" className="site-title">
-          {SITE_TITLE}
-        </a>
-      </header>
-      <main className="page">
-        {!supabaseConfigured && (
-          <p className="notice" role="status">
-            Сайт ещё не подключён к базе данных. Заполните файл .env по образцу .env.example.
-          </p>
-        )}
-        {route.name === 'program' && <h1>Программа</h1>}
-        {route.name === 'lesson' && <h1>Урок {route.id}</h1>}
-        {route.name === 'admin' && <h1>Панель владельца</h1>}
-        {route.name === 'profile' && <h1>Профиль</h1>}
-        {route.name === 'not-found' && (
-          <>
-            <h1>Страница не найдена</h1>
-            <p>
-              <a href="#/">Вернуться к программе</a>
-            </p>
-          </>
-        )}
-      </main>
+      <Header route={route} profile={profile} />
+      {route.name === 'program' && (
+        <main id="main" className="page">
+          <p className="label">Зачётная книжка</p>
+          <h1>{profile.full_name}</h1>
+          <p className="lead">Программа из восьми уроков появится здесь на следующем этапе.</p>
+        </main>
+      )}
+      {route.name === 'lesson' && (
+        <main id="main" className="page">
+          <p className="label">Урок {route.id}</p>
+          <h1>Урок {route.id}</h1>
+          <p className="lead">Содержание уроков появится на следующем этапе.</p>
+        </main>
+      )}
+      {route.name === 'admin' &&
+        (profile.role === 'admin' ? (
+          <main id="main" className="page page-wide">
+            <p className="label">Владелец курса</p>
+            <h1>Ведомость</h1>
+            <p className="lead">Таблица прогресса и очередь заданий появятся на этапе 6.</p>
+          </main>
+        ) : (
+          <NotFound />
+        ))}
+      {route.name === 'profile' && <Profile />}
+      {route.name === 'not-found' && <NotFound />}
     </>
+  );
+}
+
+function NotFound() {
+  return (
+    <main id="main" className="page page-narrow">
+      <h1>Такой страницы нет</h1>
+      <p className="lead">
+        <a href="#/">Вернуться к зачётке</a>
+      </p>
+    </main>
   );
 }
