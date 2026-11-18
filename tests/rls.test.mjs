@@ -97,7 +97,7 @@ try {
   r = await a.from('profiles').select('id, role').eq('id', A.id);
   check('A видит свой профиль с ролью student', r.data?.[0]?.role === 'student', why(r));
   r = await a.rpc('my_progress');
-  check('A получает свой прогресс по 8 урокам', r.data?.length === 8, why(r));
+  check('A получает свой прогресс по 26 урокам', r.data?.length === 26, why(r));
 
   r = await anon.from('profiles').select('*');
   check('без входа не видно профилей', refused(r), why(r));
