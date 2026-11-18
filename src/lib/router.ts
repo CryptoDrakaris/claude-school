@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { program } from './content';
 
 // Хэш-маршрутизация (#/lesson/1): на GitHub Pages нет 404 при обновлении страницы.
 export type Route =
@@ -14,8 +15,8 @@ export function parseHash(hash: string): Route {
   if (!hash.startsWith('#/')) return { name: 'program' };
   const path = hash.slice(1).split('?')[0];
   if (path === '/') return { name: 'program' };
-  const lesson = path.match(/^\/lesson\/([1-8])$/);
-  if (lesson) return { name: 'lesson', id: Number(lesson[1]) };
+  const lesson = path.match(/^\/lesson\/([1-9]\d?)$/);
+  if (lesson && program.some((l) => l.id === Number(lesson[1]))) return { name: 'lesson', id: Number(lesson[1]) };
   if (path === '/admin') return { name: 'admin' };
   if (path === '/profile') return { name: 'profile' };
   const join = path.match(/^\/join\/([A-Za-z0-9_-]{12,64})$/);

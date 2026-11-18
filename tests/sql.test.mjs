@@ -77,14 +77,14 @@ await as(null, `select public.submit_quiz(1, '[1,2,3,4,1,2,3,4]')`, 'error');
 await as(B, `select public.is_lesson_open(2) o`, (r) => r[0].o === true);
 await as(B, `update public.homework set link='https://new.link' where user_id='${B}' returning id`, 'empty');
 // владелец
-await as(ADM, `select count(*)::int c from public.admin_progress(array[1])`, (r) => r[0].c === 16);
+await as(ADM, `select count(*)::int c from public.admin_progress(array[1])`, (r) => r[0].c === 52);
 await as(ADM, `update public.homework set status='needs_rework', score=3, admin_comment='Добавьте проверку', link='https://hack' where user_id='${B}' returning link, reviewed_at`, (r) => r[0].link === 'https://claude.ai/share/x' && r[0].reviewed_at);
 await as(ADM, `insert into public.lesson_unlocks values ('${A}', 2) returning lesson_id`, (r) => r.length === 1);
 await as(ADM, `select count(*)::int c from public.quiz_keys`, (r) => r[0].c === 8);
 await as(A, `select public.is_lesson_open(2) o`, (r) => r[0].o === true);
 // B пересдаёт задание
 await as(B, `update public.homework set link='https://claude.ai/share/y', status='accepted', score=6 where user_id='${B}' returning status, score, link`, (r) => r[0].status === 'submitted' && r[0].score === 3 && r[0].link.endsWith('/y'));
-await as(B, `select * from public.my_progress()`, (r) => r.length === 8 && r[1].is_open === true && r[2].is_open === false);
+await as(B, `select * from public.my_progress()`, (r) => r.length === 26 && r[1].is_open === true && r[2].is_open === false);
 
 // Регрессия аудита C1: «отстаёт» не считается по неготовым урокам (заглушкам без задания).
 const C = '00000000-0000-0000-0000-00000000000c';
@@ -159,6 +159,41 @@ mail = (await db.query(`select body from net.calls`)).rows;
 const m2 = mail.length === 2 && /нужна доработка/.test(mail[1].body.subject) && mail[1].body.htmlContent.includes('&lt;b&gt;проверку&lt;/b&gt;') && !mail[1].body.htmlContent.includes('<b>проверку');
 if (!m2) fails++;
 console.log(m2 ? 'ok  ' : 'FAIL', 'письмо о проверке задания, комментарий экранирован; правка без смены статуса – без письма ->', mail.length);
+
+// Блоки (миграция 0006): урок 9 открывается только после теста 8 и принятого задания 8.
+const G = '00000000-0000-0000-0000-0000000000f1';
+await db.exec(`insert into auth.users (id, email) values ('${G}', 'g@t.test');
+  insert into public.quiz_keys select l, g, ((g-1)%4)+1, 'о' from generate_series(2,9) l, generate_series(1,8) g;
+  insert into public.quiz_attempts (user_id, lesson_id, answers, score, max_score, passed)
+    select '${G}', l, '[1,2,3,4,1,2,3,4]', 8, 8, true from generate_series(1,7) l;`);
+await as(G, `select public.is_lesson_open(8) o`, (r) => r[0].o === true);
+await as(G, `select public.submit_quiz(8, '[1,2,3,4,1,2,3,4]') r`, (r) => r[0].r.passed === true);
+mail = (await db.query(`select body from net.calls`)).rows;
+const g1 = /последний тест блока/.test(mail.at(-1).body.htmlContent) && !/Открыт урок 9/.test(mail.at(-1).body.htmlContent);
+if (!g1) fails++;
+console.log(g1 ? 'ok  ' : 'FAIL', 'письмо после теста 8: блок откроется после проверки задания');
+await as(G, `select public.is_lesson_open(9) o`, (r) => r[0].o === false);
+await as(G, `select public.submit_quiz(9, '[1,2,3,4,1,2,3,4]')`, 'error');
+await as(G, `insert into public.homework (user_id, lesson_id, link) values ('${G}', 8, 'https://claude.ai/share/g8') returning id`, (r) => r.length === 1);
+await as(G, `select public.is_lesson_open(9) o`, (r) => r[0].o === false);
+await as(ADM, `update public.homework set status='needs_rework', score=2 where user_id='${G}' returning id`, (r) => r.length === 1);
+await as(G, `select public.is_lesson_open(9) o`, (r) => r[0].o === false);
+await as(ADM, `update public.homework set status='accepted', score=6 where user_id='${G}' returning id`, (r) => r.length === 1);
+mail = (await db.query(`select body from net.calls`)).rows;
+const g2 = /открыт новый блок/.test(mail.at(-1).body.subject) && /Открыт урок 9, «Подключения подробно»/.test(mail.at(-1).body.htmlContent);
+if (!g2) fails++;
+console.log(g2 ? 'ok  ' : 'FAIL', 'письмо о принятом задании 8 сообщает об открытии блока ->', mail.at(-1).body.subject);
+await as(G, `select public.is_lesson_open(9) o`, (r) => r[0].o === true);
+await as(G, `select is_open, opened_at is not null o from public.my_progress() where lesson_id in (9, 10) order by lesson_id`, (r) => r[0].is_open && r[0].o && !r[1].is_open);
+await as(G, `select public.submit_quiz(9, '[1,2,3,4,1,2,3,4]') r`, (r) => r[0].r.passed === true);
+await as(G, `select public.is_lesson_open(10) o`, (r) => r[0].o === true);
+await as(G, `select public.is_lesson_open(27) o`, (r) => r[0].o === false);
+// ручное открытие первого урока блока работает без задания
+const H = '00000000-0000-0000-0000-0000000000f2';
+await db.exec(`insert into auth.users (id, email) values ('${H}', 'h@t.test')`);
+await as(ADM, `insert into public.lesson_unlocks values ('${H}', 14) returning lesson_id`, (r) => r.length === 1);
+await as(H, `select public.is_lesson_open(14) o`, (r) => r[0].o === true);
+await as(ADM, `insert into public.lesson_unlocks values ('${H}', 27)`, 'error');
 
 console.log(fails ? `\n${fails} FAIL` : '\nвсё прошло');
 process.exit(fails ? 1 : 0);

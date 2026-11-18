@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { loadLesson, program, renderMarkdown, type LessonContent } from '../lib/content';
+import { blockOf, closedReason, loadLesson, program, renderMarkdown, type LessonContent } from '../lib/content';
 import { useAuth } from '../lib/auth';
 import { lessonStatus, useProgress } from '../lib/progress';
 import { Quiz } from '../components/Quiz';
@@ -49,7 +49,7 @@ export function Lesson({ id }: { id: number }) {
         <p className="label">Урок {id}</p>
         <h1>{meta.title}</h1>
         <p className="lead">
-          Урок откроется, когда тест урока {id - 1} будет сдан на 6 из 8. <a href="#/">К зачётке</a>
+          {closedReason(id)} <a href="#/">К зачётке</a>
         </p>
       </main>
     );
@@ -57,7 +57,9 @@ export function Lesson({ id }: { id: number }) {
 
   return (
     <main id="main" className="page">
-      <p className="label">Урок {id} из {program.length}</p>
+      <p className="label">
+        Блок {blockOf(id).id} «{blockOf(id).title}» · урок {id} из {program.length}
+      </p>
       <h1>{meta.title}</h1>
       <p className="lead">{meta.about}</p>
 

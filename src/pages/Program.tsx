@@ -1,4 +1,4 @@
-import { program } from '../lib/content';
+import { blocks, closedReason, program } from '../lib/content';
 import { useAuth } from '../lib/auth';
 import { lessonStatus, STATUS_TEXT, useProgress, type LessonStatus, type ProgressRow } from '../lib/progress';
 
@@ -27,7 +27,7 @@ function nextStep(rows: ProgressRow[]): string {
   for (const meta of program) {
     const row = byId.get(meta.id);
     const status = lessonStatus(row);
-    if (status === 'closed') return `Урок ${meta.id} откроется, когда тест урока ${meta.id - 1} будет сдан на 6 из 8.`;
+    if (status === 'closed') return closedReason(meta.id);
     if (status === 'open' && !meta.ready) return `Урок ${meta.id}, «${meta.title}», ещё готовится – владелец курса сообщит, когда он появится.`;
     if (status === 'open') return `Следующий шаг – урок ${meta.id}, «${meta.title}»: прочитать, сделать практику, сдать тест.`;
     if (status === 'test-passed') return `Тест урока ${meta.id} сдан. Осталось сдать задание.`;
@@ -73,39 +73,59 @@ export function Program() {
             </th>
           </tr>
         </thead>
-        <tbody>
-          {program.map((meta) => {
-            const row = byId.get(meta.id);
-            const status = lessonStatus(row);
-            const reachable = isAdmin || status !== 'closed';
-            const current = !isAdmin && (status === 'open' || status === 'test-passed' || status === 'hw-rework');
-            return (
-              <tr key={meta.id} className={[current ? 'current' : '', reachable ? '' : 'closed'].join(' ').trim() || undefined}>
-                <td className="no">{meta.id}</td>
-                <td>
-                  {reachable ? <a href={`#/lesson/${meta.id}`}>{meta.title}</a> : meta.title}
-                  {!meta.ready && <span className="muted"> · готовится</span>}
-                </td>
-                <td className="num">
-                  {row?.best_score != null ? (
-                    <>
-                      {row.best_score} из {row.max_score}
-                    </>
-                  ) : (
-                    '–'
-                  )}
-                </td>
-                <td>{rows ? isAdmin ? <span className="muted">–</span> : <Mark status={status} /> : null}</td>
-              </tr>
-            );
-          })}
-        </tbody>
+        {blocks.map((b) => (
+          <tbody key={b.id}>
+            <tr className="block-row">
+              <th scope="colgroup" colSpan={4}>
+                <span className="label">Блок {b.id}</span> {b.title}
+                <span className="block-about">{b.about}</span>
+                {b.id === 2 && (
+                  <span className="block-about">
+                    Для блоков 2–4 нужен тариф Pro и приложение Claude для компьютера. У владельца курса три гостевых
+                    пропуска – неделя Pro бесплатно. Их получат трое первых, кто пройдёт блок 1.
+                  </span>
+                )}
+              </th>
+            </tr>
+            {program
+              .filter((meta) => meta.block === b.id)
+              .map((meta) => {
+                const row = byId.get(meta.id);
+                const status = lessonStatus(row);
+                const reachable = isAdmin || status !== 'closed';
+                const current = !isAdmin && (status === 'open' || status === 'test-passed' || status === 'hw-rework');
+                return (
+                  <tr
+                    key={meta.id}
+                    className={[current ? 'current' : '', reachable ? '' : 'closed'].join(' ').trim() || undefined}
+                  >
+                    <td className="no">{meta.id}</td>
+                    <td>
+                      {reachable ? <a href={`#/lesson/${meta.id}`}>{meta.title}</a> : meta.title}
+                      {!meta.ready && <span className="muted"> · готовится</span>}
+                    </td>
+                    <td className="num">
+                      {row?.best_score != null ? (
+                        <>
+                          {row.best_score} из {row.max_score}
+                        </>
+                      ) : (
+                        '–'
+                      )}
+                    </td>
+                    <td>{rows ? isAdmin ? <span className="muted">–</span> : <Mark status={status} /> : null}</td>
+                  </tr>
+                );
+              })}
+          </tbody>
+        ))}
       </table>
 
       {rows && (
         <>
           <div
             className="bar"
+            style={{ gridTemplateColumns: `repeat(${program.length}, 1fr)` }}
             role="img"
             aria-label={`Пройдено уроков: ${accepted} из ${program.length}${inWork ? `, в работе: ${inWork}` : ''}`}
           >

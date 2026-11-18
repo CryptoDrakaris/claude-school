@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
-import type { QuizQuestion } from '../lib/content';
+import { isBlockStart, type QuizQuestion } from '../lib/content';
 import type { ProgressRow } from '../lib/progress';
 
 // До сдачи теста сервер не присылает правильный вариант и объяснение (correct/explanation = null).
@@ -110,7 +110,9 @@ export function Quiz({
         <p className="lead">
           {result.passed
             ? nextLesson
-              ? nextLesson.ready
+              ? isBlockStart(nextLesson.id)
+                ? `Это последний тест блока. Следующий блок откроется, когда владелец курса примет итоговое задание этого урока – сдайте его ниже.`
+                : nextLesson.ready
                 ? `Урок ${nextLesson.id} открыт. Не забудьте сдать задание этого урока.`
                 : `Урок ${nextLesson.id} откроется, как только будет готов. Не забудьте сдать задание этого урока.`
               : 'Это последний тест курса. Осталось сдать задание.'
@@ -147,7 +149,7 @@ export function Quiz({
           <button type="button" className={result.passed ? 'link-button' : 'btn'} onClick={retry}>
             Пройти тест ещё раз
           </button>
-          {result.passed && nextLesson?.ready && <a href={`#/lesson/${nextLesson.id}`}>Перейти к уроку {nextLesson.id}</a>}
+          {result.passed && nextLesson?.ready && !isBlockStart(nextLesson.id) && <a href={`#/lesson/${nextLesson.id}`}>Перейти к уроку {nextLesson.id}</a>}
         </div>
       </div>
     );

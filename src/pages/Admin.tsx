@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { supabase } from '../lib/supabase';
-import { program } from '../lib/content';
+import { blocks, program } from '../lib/content';
 import { STATUS_TEXT, lessonStatus, type ProgressRow } from '../lib/progress';
 import { Invites } from '../components/Invites';
 
@@ -149,6 +149,15 @@ export function Admin() {
             <div className="table-scroll" tabIndex={0} role="region" aria-labelledby="h-book">
               <table className="ledger">
                 <thead>
+                  <tr>
+                    <td className="sticky-col" />
+                    {blocks.map((b) => (
+                      <th key={b.id} scope="colgroup" colSpan={b.to - b.from + 1} className="label block-head">
+                        {b.id}. {b.title}
+                      </th>
+                    ))}
+                    <td />
+                  </tr>
                   <tr>
                     <th scope="col" className="label sticky-col">
                       Участник

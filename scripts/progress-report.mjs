@@ -56,7 +56,7 @@ for (const s of students) {
   const mine = attempts.filter((a) => a.user_id === s.id);
   const passed = [...new Set(mine.filter((a) => a.passed).map((a) => a.lesson_id))].sort((a, b) => a - b);
   const acc = homework.filter((h) => h.user_id === s.id && h.status === 'accepted').map((h) => h.lesson_id).sort((a, b) => a - b);
-  const current = Math.min(8, (passed.at(-1) ?? 0) + 1);
+  const current = Math.min(program.length, (passed.at(-1) ?? 0) + 1);
   out.push(`| ${s.full_name ?? '(без имени)'} | ${emailOf[s.id] ?? '–'} | ${d(signedIn[s.id])} | ${passed.join(', ') || '–'} | ${acc.join(', ') || '–'} | ${current} |`);
 }
 out.push('');

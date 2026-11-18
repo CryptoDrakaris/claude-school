@@ -1,5 +1,6 @@
 import { Marked } from 'marked';
 import programData from '../../content/program.json';
+import blocksData from '../../content/blocks.json';
 
 // Содержание уроков – файлы в content/lessons/NN-slug/. Ответов на тесты здесь нет и быть не должно.
 export interface LessonMeta {
@@ -8,6 +9,16 @@ export interface LessonMeta {
   title: string;
   about: string;
   ready: boolean;
+  block: number;
+}
+
+// Блоки курса: первый урок блока открывается после теста и принятого задания последнего урока прошлого блока.
+export interface BlockMeta {
+  id: number;
+  title: string;
+  about: string;
+  from: number;
+  to: number;
 }
 
 export interface QuizQuestion {
@@ -23,6 +34,19 @@ export interface LessonContent {
 }
 
 export const program = programData as LessonMeta[];
+export const blocks = blocksData as BlockMeta[];
+
+export const blockOf = (lessonId: number) => blocks.find((b) => lessonId >= b.from && lessonId <= b.to)!;
+export const isBlockStart = (lessonId: number) => lessonId > 1 && blocks.some((b) => b.from === lessonId);
+
+// Почему урок закрыт – одна фраза для зачётки и страницы урока.
+export function closedReason(lessonId: number): string {
+  if (isBlockStart(lessonId)) {
+    const b = blockOf(lessonId);
+    return `Блок ${b.id} «${b.title}» откроется, когда тест урока ${lessonId - 1} будет сдан на 6 из 8 и владелец курса примет итоговое задание урока ${lessonId - 1}.`;
+  }
+  return `Урок ${lessonId} откроется, когда тест урока ${lessonId - 1} будет сдан на 6 из 8.`;
+}
 
 const markdownFiles = import.meta.glob('/content/lessons/*/*.md', { query: '?raw', import: 'default' });
 const quizFiles = import.meta.glob('/content/lessons/*/quiz.json', { import: 'default' });
