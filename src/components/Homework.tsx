@@ -15,10 +15,23 @@ interface HomeworkRow {
 
 const dateFmt = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
 
+// Ссылки на личные страницы claude.ai (чат, проект) видит только автор: принимаем только опубликованные.
+const PRIVATE_CLAUDE = /^\/(chat|project|projects|new|recents)(\/|$)/;
+
 function checkLink(value: string): string | null {
   if (!value) return 'Вставьте ссылку на чат или документ.';
-  if (!/^https?:\/\/\S+\.\S+/.test(value)) {
+  let url: URL | null = null;
+  try {
+    url = new URL(value);
+  } catch {
+    // не ссылка – ответим ниже
+  }
+  if (!url || !/^https?:$/.test(url.protocol) || !url.hostname.includes('.')) {
     return 'Нужна ссылка, которая начинается с https:// – её даёт кнопка Share в чате Claude.';
+  }
+  const host = url.hostname.toLowerCase();
+  if ((host === 'claude.ai' || host.endsWith('.claude.ai')) && PRIVATE_CLAUDE.test(url.pathname)) {
+    return 'Это адрес вашего личного чата – его не видит никто, кроме вас. Нажмите Share в правом верхнем углу чата, создайте ссылку и вставьте её: она начинается с https://claude.ai/share/.';
   }
   return null;
 }
@@ -164,8 +177,11 @@ export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number;
                 setLinkError(null);
               }}
               aria-invalid={linkError ? true : undefined}
-              aria-describedby={linkError ? 'hw-link-error' : undefined}
+              aria-describedby={linkError ? 'hw-link-hint hw-link-error' : 'hw-link-hint'}
             />
+            <p id="hw-link-hint" className="muted">
+              Перед сдачей откройте ссылку в окне инкогнито: если просит войти или запросить доступ, владелец курса её тоже не откроет.
+            </p>
             {linkError && (
               <p id="hw-link-error" className="field-error" role="alert">
                 {linkError}
