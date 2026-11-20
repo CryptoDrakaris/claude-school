@@ -36,6 +36,17 @@ function checkLink(value: string): string | null {
   return null;
 }
 
+// Комментарий обязателен: по ссылке не видны файлы и проверка, без него работу не оценить.
+const COMMENT_MIN = 150;
+
+function checkComment(value: string): string | null {
+  if (!value) return 'Напишите комментарий по пунктам из условия задания – без него работу не оценить.';
+  if (value.length < COMMENT_MIN) {
+    return `Комментарий слишком короткий: ответьте на каждый пункт условия задания (сейчас ${value.length} знаков, нужно от ${COMMENT_MIN}).`;
+  }
+  return null;
+}
+
 export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number; canSubmit: boolean; onChanged: () => void }) {
   const { session } = useAuth();
   // Зависим от id пользователя, а не от объекта сессии: supabase-js присылает новый объект
@@ -47,6 +58,7 @@ export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number;
   const [link, setLink] = useState('');
   const [comment, setComment] = useState('');
   const [linkError, setLinkError] = useState<string | null>(null);
+  const [commentError, setCommentError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
   const [justSent, setJustSent] = useState(false);
@@ -80,10 +92,13 @@ export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number;
     const value = link.trim();
     const problem = checkLink(value);
     setLinkError(problem);
-    if (problem) return;
+    const text = comment.trim();
+    const commentProblem = checkComment(text);
+    setCommentError(commentProblem);
+    if (problem || commentProblem) return;
     setSending(true);
     setError(null);
-    const payload = { link: value, comment: comment.trim() || null };
+    const payload = { link: value, comment: text };
     const { error: err } = row
       ? await supabase.from('homework').update(payload).eq('id', row.id)
       : await supabase.from('homework').insert({ ...payload, user_id: session.user.id, lesson_id: lessonId });
@@ -189,7 +204,7 @@ export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number;
             )}
           </div>
           <div className="field">
-            <label htmlFor="hw-comment">Комментарий</label>
+            <label htmlFor="hw-comment">Комментарий (обязательно)</label>
             <textarea
               id="hw-comment"
               rows={5}
@@ -198,12 +213,20 @@ export function Homework({ lessonId, canSubmit, onChanged }: { lessonId: number;
               onChange={(e) => {
                 edited.current = true;
                 setComment(e.target.value);
+                setCommentError(null);
               }}
-              aria-describedby="hw-comment-hint"
+              aria-invalid={commentError ? true : undefined}
+              aria-describedby={commentError ? 'hw-comment-hint hw-comment-error' : 'hw-comment-hint'}
             />
             <p id="hw-comment-hint" className="muted">
-              Какую задачу решали, что проверили и что оказалось, что в следующий раз напишете иначе.
+              Ответьте на каждый пункт из условия задания выше: что за задача, что проверили и что оказалось. По ссылке не
+              видно, что вы проверяли, – владелец курса узнает это только из комментария.
             </p>
+            {commentError && (
+              <p id="hw-comment-error" className="field-error" role="alert">
+                {commentError}
+              </p>
+            )}
           </div>
           {error && (
             <p className="field-error" role="alert">
